@@ -12,9 +12,6 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write ."
   },
-  "jest": {
-    "preset": "jest-expo"
-  },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/native": "^7.1.6",
