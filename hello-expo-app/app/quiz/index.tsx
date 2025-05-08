@@ -1,6 +1,6 @@
 // app/quiz/index.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import QuestionCard from '@/components/QuestionCard';
 import ScoreModal from '@/components/ScoreModal';
 // ↓ JSON をインポート (tsconfig で "resolveJsonModule": true が必要)

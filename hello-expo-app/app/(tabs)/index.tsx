@@ -1,4 +1,4 @@
-import EditScreenInfo from '@/components/EditScreenInfo';
+// import EditScreenInfo from '@/components/EditScreenInfo';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 
