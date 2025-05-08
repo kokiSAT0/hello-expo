@@ -1,0 +1,25 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    # 👇 追加：すべての run コマンドを hello-expo-app フォルダで実行
+    defaults:
+      run:
+        working-directory: hello-expo-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          # 👇 追加：lockfile の場所を指定
+          cache-dependency-path: hello-expo-app/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
