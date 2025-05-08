@@ -6,13 +6,20 @@ jobs:
   lint:
     runs-on: ubuntu-latest
 
+    # ここでデフォルトの作業ディレクトリを指定
+    defaults:
+      run:
+        working-directory: hello-expo-app
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20 # プロジェクトの Node バージョン
-          cache: npm # npm の依存キャッシュ
+          node-version: 20
+          cache: npm
+          # cache ディレクトリもサブフォルダに合わせる
+          cache-dependency-path: hello-expo-app/package-lock.json
 
       - run: npm ci
       - run: npm run lint
