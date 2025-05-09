@@ -21,9 +21,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
+          cache-dependency-path: hello-expo-app/package-lock.json  #  追加
 
       - name: Install dependencies
         run: npm ci
+        working-directory: hello-expo-app    #  追加
 
       - name: Run Jest (CI mode)
         run: npm run test:ci
+        working-directory: hello-expo-app    #  追加
