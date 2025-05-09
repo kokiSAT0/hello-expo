@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+// ★ 追加: DB初期化用の関数をインポート
+import { bulkInsertQuestions } from '@/services/bulkInsertQuestions';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -34,11 +36,27 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
+  // フォントが読み込まれたらスプラッシュを消す
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // ★ 追加: アプリ起動時にDBのテーブル作成＆データ挿入を実行
+  //    既にデータがあればスキップされる想定
+  useEffect(() => {
+    async function initDB() {
+      try {
+        await bulkInsertQuestions();
+        console.log('bulkInsertQuestions done.');
+      } catch (err) {
+        console.error('DB init error:', err);
+      }
+    }
+
+    initDB();
+  }, []);
 
   if (!loaded) {
     return null;
