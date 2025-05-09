@@ -10,7 +10,8 @@
     "test": "jest --watchAll",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:ci": "jest --ci --coverage --runInBand"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
