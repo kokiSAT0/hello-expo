@@ -1,6 +1,12 @@
 // services/QuizRepository.ts
-import { db } from './db';
 
+/**
+ * クイズデータ取得用リポジトリ。
+ * すべて非同期 API（Promise ベース）で実装しています。
+ */
+import { getDb } from './db';
+
+/** SQLite 行オブジェクトの型定義 */
 export type QuizRow = {
   id: number;
   question: string;
@@ -11,26 +17,15 @@ export type QuizRow = {
   correctIndex: number;
 };
 
-/** 全問題を取得する関数 */
-export function fetchAllQuestions(): Promise<QuizRow[]> {
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `SELECT *
-         FROM quiz_data;`,
-        [],
-        (_, resultSet) => {
-          const items: QuizRow[] = [];
-          for (let i = 0; i < resultSet.rows.length; i++) {
-            items.push(resultSet.rows.item(i));
-          }
-          resolve(items);
-        },
-        (_, err) => {
-          reject(err);
-          return true;
-        },
-      );
-    });
-  });
+/**
+ * テーブル内の全クイズ問題を取得して配列で返す。
+ * 例:
+ * ```ts
+ * const quizzes = await fetchAllQuestions();
+ * ```
+ */
+export async function fetchAllQuestions(): Promise<QuizRow[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<QuizRow>('SELECT * FROM quiz_data;');
+  return rows;
 }
