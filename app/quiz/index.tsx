@@ -1,12 +1,29 @@
 // app/quiz/index.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import QuestionCard from '@/components/QuestionCard';
 import ScoreModal from '@/components/ScoreModal';
-// ↓ JSON をインポート (tsconfig で "resolveJsonModule": true が必要)
-import questions from '@/assets/data/questions.json';
+
+// ★ JSON のインポートは削除し、DBのSELECTを使う
+import { fetchAllQuestions } from '@/services/QuizRepository';
+
+// DBから取り出した1件の型 (QuizRepositoryで定義している想定)
+type QuizRow = {
+  id: number;
+  question: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctIndex: number;
+};
 
 export default function QuizScreen() {
+  // DBから取得した全問題
+  const [questions, setQuestions] = useState<QuizRow[]>([]);
+  // ローディング
+  const [loading, setLoading] = useState(true);
+
   // 現在の問題番号
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   // スコア
@@ -14,8 +31,44 @@ export default function QuizScreen() {
   // クイズ終了フラグ
   const [isQuizFinished, setIsQuizFinished] = useState(false);
 
-  // 現在の問題データ
+  // ★ 初回マウントでDBから問題を取得
+  useEffect(() => {
+    fetchAllQuestions()
+      .then((data) => {
+        setQuestions(data);
+      })
+      .catch((err) => console.error('Failed to load questions:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // ローディング状態
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#999" />
+      </View>
+    );
+  }
+
+  // DBに問題が無かった場合
+  if (questions.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text>問題がありません。DBにデータが入っていない可能性があります。</Text>
+      </View>
+    );
+  }
+
+  // 現在の問題
   const currentQuestion = questions[currentQuestionIndex];
+
+  // 選択肢を配列にまとめる
+  const options = [
+    currentQuestion.optionA,
+    currentQuestion.optionB,
+    currentQuestion.optionC,
+    currentQuestion.optionD,
+  ];
 
   // 選択肢を選んだときの処理
   const handleOptionSelect = (selectedIndex: number) => {
@@ -28,7 +81,7 @@ export default function QuizScreen() {
     if (nextIndex < questions.length) {
       setCurrentQuestionIndex(nextIndex);
     } else {
-      // 最後の問題まで到達したらクイズ終了
+      // 最後の問題
       setIsQuizFinished(true);
     }
   };
@@ -47,13 +100,14 @@ export default function QuizScreen() {
         <>
           <QuestionCard
             question={currentQuestion.question}
-            options={currentQuestion.options}
+            options={options}
             onSelectOption={handleOptionSelect}
           />
           <View style={styles.footer}>
             <Text style={styles.score}>
               Score: {score} / {questions.length}
             </Text>
+            {/* スキップボタンは -1を渡して正解チェックを回避 */}
             <Pressable style={styles.nextBtn} onPress={() => handleOptionSelect(-1)}>
               <Text style={styles.nextLabel}>スキップ</Text>
             </Pressable>
