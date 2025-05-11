@@ -5,19 +5,20 @@ type ScoreModalProps = {
   visible: boolean;
   score: number;
   total: number;
+  highScore: number; // 追加: ハイスコアを表示するためのプロパティ
   onRetry: () => void;
 };
 
-export default function ScoreModal({ visible, score, total, onRetry }: ScoreModalProps) {
+export default function ScoreModal({ visible, score, total, highScore, onRetry }: ScoreModalProps) {
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.title}>お疲れさまでした！</Text>
           <Text style={styles.score}>
-            あなたのスコア: {score} / {total}
+            今回のスコア: {score} / {total}
           </Text>
-
+          <Text style={styles.high}>ベストスコア: {highScore}</Text>
           <Pressable style={styles.retryBtn} onPress={onRetry}>
             <Text style={styles.retryText}>もう一度挑戦</Text>
           </Pressable>
@@ -61,4 +62,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  high: { fontSize: 20, fontWeight: 'bold', color: '#f97316', marginTop: 4 },
 });

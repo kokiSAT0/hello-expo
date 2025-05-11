@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import QuestionCard from '@/components/QuestionCard';
 import ScoreModal from '@/components/ScoreModal';
+import { load, save, STORAGE_KEYS } from '@/utils/storage';
 
 // ★ JSON のインポートは削除し、DBのSELECTを使う
 import { fetchAllQuestions } from '@/services/QuizRepository';
@@ -31,6 +32,8 @@ export default function QuizScreen() {
   // クイズ終了フラグ
   const [isQuizFinished, setIsQuizFinished] = useState(false);
 
+  const [highScore, setHighScore] = useState(0);
+
   // ★ 初回マウントでDBから問題を取得
   useEffect(() => {
     fetchAllQuestions()
@@ -40,6 +43,21 @@ export default function QuizScreen() {
       .catch((err) => console.error('Failed to load questions:', err))
       .finally(() => setLoading(false));
   }, []);
+
+  // ① アプリ起動時にハイスコア読込
+  useEffect(() => {
+    load<number>(STORAGE_KEYS.high, 0).then(setHighScore);
+  }, []);
+
+  useEffect(() => {
+    // クイズ終了時だけ実行
+    if (isQuizFinished && score > highScore) {
+      (async () => {
+        await save(STORAGE_KEYS.high, score);
+        setHighScore(score);
+      })();
+    }
+  }, [isQuizFinished, score, highScore]);
 
   // ローディング状態
   if (loading) {
@@ -107,6 +125,7 @@ export default function QuizScreen() {
             <Text style={styles.score}>
               Score: {score} / {questions.length}
             </Text>
+            <Text style={styles.best}>Best: {highScore}</Text>
             {/* スキップボタンは -1を渡して正解チェックを回避 */}
             <Pressable style={styles.nextBtn} onPress={() => handleOptionSelect(-1)}>
               <Text style={styles.nextLabel}>スキップ</Text>
@@ -120,6 +139,7 @@ export default function QuizScreen() {
         visible={isQuizFinished}
         score={score}
         total={questions.length}
+        highScore={highScore} // 追加: ハイスコアを表示するためのプロパティ
         onRetry={handleRetry}
       />
     </View>
@@ -142,4 +162,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   nextLabel: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  best: { fontSize: 14, color: '#4f46e5', fontWeight: '600' },
 });
